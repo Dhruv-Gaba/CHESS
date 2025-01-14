@@ -2,7 +2,8 @@ import { Color, PieceSymbol, Square } from "chess.js"
 import { useState } from "react"
 import { MOVE } from "../screens/Game";
 
-export const ChessBoard=({board,socket,chess,setBoard}:{
+export const ChessBoard=({color,board,socket,chess,setBoard}:{
+    color:string,
     chess:any,
     setBoard:any,
     board:({
@@ -16,7 +17,7 @@ export const ChessBoard=({board,socket,chess,setBoard}:{
     // const [to,setTo]=useState<string|null>(null);
 
     return(
-        <div className="text-white-200">
+        <div className={`text-white-200 ${color==="black"?"rotate-180":""}`}>
             {board.map((row, i) => {
                 return(
                 <div key={i} className="flex">
@@ -50,10 +51,11 @@ export const ChessBoard=({board,socket,chess,setBoard}:{
                                             to:squareRep
                                         }
                                     )
+                                    console.log(socket);
                                 }
-                            }} key={j} className={`w-16 h-16 lg:w-20 lg:h-20 ${(i+j)%2==0?'bg-green-500':'bg-white'}`}>
+                            }} key={j} className={`w-16 h-16 lg:w-20 lg:h-20 ${(i+j)%2==0?'bg-white':'bg-green-500'} cursor-pointer`}>
                                 <div className="flex justify-center items-center h-full font-bold">
-                                    {square?square.type:""}
+                                    {square?<img src={`/${square.color==="b"?square.type:square.type.toUpperCase()+" copy"}.png`} className={color==="black"?"rotate-180":""}/>:""}
                                 </div>
                             </div>
                         )
