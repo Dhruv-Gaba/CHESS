@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Button } from "../components/Button"
 import { ChessBoard } from "../components/ChessBoard"
 import { useSocket } from "../hooks/useSocket"
-import { Chess } from "chess.js";
+import { Chess, Move } from "chess.js";
+import { MovesTable } from "../components/MovesTable";
 
 //code repetition
 export const INIT_GAME="init_game";
@@ -18,6 +19,7 @@ export const Game=()=>{
     const [gameOver,setGameOver]=useState(false);
     const [winner,setWinner]=useState("");
     const [color,setColor]=useState("");
+    const [moves,setMoves]=useState<Move[]>(chess.history({ verbose: true }));
 
     useEffect(()=>{
         if(!socket){
@@ -33,11 +35,13 @@ export const Game=()=>{
                     setBoard(chess.board());
                     setColor(message.payload.color);
                     console.log("game initialized");
+                    console.log(moves)
                     break;
                 case MOVE:
                     const move=message.payload;
                     chess.move(move);
                     setBoard(chess.board());
+                    setMoves(chess.history({ verbose: true }));
                     console.log("move made");
                     break;
                 case GAME_OVER:
@@ -58,9 +62,9 @@ export const Game=()=>{
             <div className="pt-8 max-w-screen-lg w-full">
                 <div className="grid grid-cols-6 gap-4 w-full">
                     <div className="col-span-4 w-full flex justify-center">
-                        <ChessBoard color={color} chess={chess} setBoard={setBoard} board={board} socket={socket}/>
+                        <ChessBoard setMoves={setMoves} color={color} chess={chess} setBoard={setBoard} board={board} socket={socket}/>
                     </div>
-                    <div className="bg-slate-900 col-span-2 w-full flex justify-center">
+                    <div className="bg-slate-900 col-span-2 w-full flex justify-center h-[32rem] lg:h-[40rem] overflow-auto overflow-x-hidden">
                         <div className="pt-8">
                             <div className="text-white">
                                 {text && text}
@@ -83,7 +87,12 @@ export const Game=()=>{
                                     </Button>
                                 }
                                 {
-                                    started && !gameOver && <h1 className="text-white text-4xl font-bold">Game Started</h1>
+                                    started && !gameOver && <div className="text-white">
+                                        <h1 className="text-4xl font-bold pb-3">Game Started</h1>
+                                        <hr/>
+                                        <h3 className="py-4">Moves Table :</h3>
+                                        <MovesTable moves={moves}/>
+                                    </div>
                                 }
                             </div>
                         </div>

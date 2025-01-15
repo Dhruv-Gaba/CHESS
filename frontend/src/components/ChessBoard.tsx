@@ -1,8 +1,30 @@
-import { Color, PieceSymbol, Square } from "chess.js"
+import { Chess, Color, Move, PieceSymbol, Square } from "chess.js"
 import { useState } from "react"
 import { MOVE } from "../screens/Game";
 
-export const ChessBoard=({color,board,socket,chess,setBoard}:{
+export function isPromoting(chess:Chess,from:Square,to:Square) {
+    const piece = chess.get(from);
+  
+    if (piece?.type !== "p") {
+      return false;
+    }
+  
+    if (piece.color !== chess.turn()) {
+      return false;
+    }
+  
+    if (!["1", "8"].some((it) => to.endsWith(it))) {
+      return false;
+    }
+  
+    return chess
+      .moves({ square:from, verbose: true })
+      .map((it) => it.to)
+      .includes(to);
+  }
+
+export const ChessBoard=({setMoves,color,board,socket,chess,setBoard}:{
+    setMoves:React.Dispatch<React.SetStateAction<Move[]>>,
     color:string,
     chess:any,
     setBoard:any,
@@ -28,22 +50,43 @@ export const ChessBoard=({color,board,socket,chess,setBoard}:{
                                 if(!from){
                                     setFrom(squareRep);
                                 }else{
-                                    socket.send(JSON.stringify({
-                                        type:MOVE,
-                                        payload:{
-                                            move:{
-                                                from,
-                                                to:squareRep
-                                            }
-                                            
-                                        }
-                                    }))
                                     setFrom(null);
-                                    chess.move({
-                                        from,
-                                        to:squareRep
-                                    });
+                                    if(isPromoting(chess,from as Square,squareRep as Square)){
+                                        const piece=prompt("what you want to promote to? q=>queen; r=>rook; b=>bishop; n=>knight;");
+                                        socket.send(JSON.stringify({
+                                            type:MOVE,
+                                            payload:{
+                                                move:{
+                                                    from,
+                                                    to:squareRep,
+                                                    promotion:piece
+                                                }
+                                            }
+                                        }))
+                                        chess.move({
+                                            from,
+                                            to:squareRep,
+                                            promotion:piece
+                                        });
+                                    }
+                                    else{
+                                        socket.send(JSON.stringify({
+                                            type:MOVE,
+                                            payload:{
+                                                move:{
+                                                    from,
+                                                    to:squareRep
+                                                }
+                                            }
+                                        }))
+                                        chess.move({
+                                            from,
+                                            to:squareRep,
+                                        });
+                                    }
                                     setBoard(chess.board());
+                                    setMoves(chess.history({ verbose: true }));
+
 
                                     console.log(
                                         {
@@ -51,9 +94,8 @@ export const ChessBoard=({color,board,socket,chess,setBoard}:{
                                             to:squareRep
                                         }
                                     )
-                                    console.log(socket);
                                 }
-                            }} key={j} className={`w-16 h-16 lg:w-20 lg:h-20 ${(i+j)%2==0?'bg-white':'bg-green-500'} cursor-pointer`}>
+                            }} key={j} className={`w-16 h-16 lg:w-20 lg:h-20 ${from && from===squareRep?"bg-red-400":((i+j)%2==0?'bg-white':'bg-green-500')} cursor-pointer`}>
                                 <div className="flex justify-center items-center h-full font-bold">
                                     {square?<img src={`/${square.color==="b"?square.type:square.type.toUpperCase()+" copy"}.png`} className={color==="black"?"rotate-180":""}/>:""}
                                 </div>
