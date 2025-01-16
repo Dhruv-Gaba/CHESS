@@ -85,8 +85,8 @@ Through this project, I gained valuable insights into the following:
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/multiplayer-chess-game.git
-   cd multiplayer-chess-game
+   git clone https://github.com/Dhruv-Gaba/CHESS.git
+   cd CHESS
    ```
 
 2. Install dependencies for both backend and frontend:
