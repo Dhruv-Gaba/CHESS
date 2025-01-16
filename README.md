@@ -53,6 +53,12 @@ This project is a feature-rich web application that allows users to play chess l
 
 ---
 
+## Deployed Link
+
+ https://chess-4bds.onrender.com/
+
+---
+
 ## Key Learnings
 
 Through this project, I gained valuable insights into the following:
